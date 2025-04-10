@@ -7,9 +7,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 API_KEY = os.getenv("API_KEY")
-INSTANCES = os.getenv("INSTANCES")
-
-print (INSTANCES)
+INSTANCES = os.getenv("INSTANCES").split(';')  # Split the INSTANCES by semicolon to get each instance
+print(f"Loaded Instances: {INSTANCES}")
 
 def get_executions_from_n8n(instance_url, api_key):
     headers = {'Authorization': f'Bearer {api_key}'}
@@ -94,7 +93,9 @@ def push_data_to_api(data):
 
 # Function that fetches data from each n8n instance and pushes it to the API
 def task():
+    print (os.getenv("INSTANCES"))
     for instance in INSTANCES:
+        print (f"Processing instance: {instance}")
         instance_name, instance_url, instance_api_key = instance.split(',')
         print(f"Fetching data from {instance_name}...")
         # data = get_data_from_n8n(instance_url, instance_api_key)
