@@ -2,10 +2,14 @@ import os
 import requests
 import schedule
 import time
+from dotenv import load_dotenv
+
+load_dotenv()
 
 API_KEY = os.getenv("API_KEY")
-INSTANCES = os.getenv("INSTANCES").split(';')
+INSTANCES = os.getenv("INSTANCES")
 
+print (INSTANCES)
 
 def get_executions_from_n8n(instance_url, api_key):
     headers = {'Authorization': f'Bearer {api_key}'}
@@ -98,7 +102,10 @@ def task():
         #     push_data_to_api(data)
 
 # Schedule the task every x minutes (e.g., every 10 minutes)
+print ("Scheduling task to run every 1 minute...")
 schedule.every(1).minutes.do(task)
+
+task()
 
 # Run the scheduler
 while True:

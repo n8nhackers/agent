@@ -1,3 +1,3 @@
 #!/bin/sh
 
-python src/agent.py
+python agent.py
