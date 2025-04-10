@@ -127,7 +127,7 @@ def push_data_to_n8nhackers(instance_name, type, data):
         'data': data
     }
     print (f"Pushing data to n8nhackers for {instance_name}...")
-    print (json)
+    # print (json)
     headers = {
         'X-API-KEY': N8NHACKERS_API_KEY,
         'Content-Type': 'application/json'
@@ -164,11 +164,11 @@ def do_task(type):
    
 
 # Schedule the task every x minutes (e.g., every 10 minutes)
-print("Scheduling task to run every 1 minute...")
-# schedule.every(5).minutes.do(lambda: do_task('alarms'))
-# schedule.every(1).day.at("06:00").do(lambda: do_task('backups'))
+print("Scheduling tasks ...")
+schedule.every(5).minutes.do(lambda: do_task('alarms'))
+schedule.every(1).day.at("06:00").do(lambda: do_task('backups'))
 
-do_task('alarms')  # Run immediately for testing
+# do_task('alarms')  # Run immediately for testing
 
 # Run the scheduler
 while True:

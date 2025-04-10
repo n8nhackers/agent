@@ -2,7 +2,7 @@ version: '3'
 
 services:
   agent:
-    image: your-python-agent-image
+    image: n8nhackers/agent:latest
     env_file:
       - .env
     networks:
