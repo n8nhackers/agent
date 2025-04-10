@@ -1,0 +1,9 @@
+version: '3'
+
+services:
+  agent:
+    image: your-python-agent-image
+    env_file:
+      - .env
+    networks:
+      - default
