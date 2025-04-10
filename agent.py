@@ -120,24 +120,24 @@ def check_access(instance_url, api_key):
     return response.status_code < 400
     
 
-def push_data_to_n8nhackers(instance_name, type, raw):
-    data = {
+def push_data_to_n8nhackers(instance_name, type, data):
+    json = {
         'instance_name': instance_name,
         'type': type,
-        'raw': raw
+        'data': data
     }
-    
+    print (f"Pushing data to n8nhackers for {instance_name}...")
+    print (json)
     headers = {
         'X-API-KEY': N8NHACKERS_API_KEY,
         'Content-Type': 'application/json'
     }
     try:
-        response = requests.post(f'{N8NHACKERS_API_URL}/api/v1/agent/data', json=data, headers=headers)
+        response = requests.post(f'{N8NHACKERS_API_URL}/api/v1/agent/data', json=json, headers=headers)
         response.raise_for_status()
         print(f"Data pushed successfully for {instance_name}")
     except requests.exceptions.RequestException as e:
         print(f"Error pushing data for {instance_name}: {e}")
-    
     
 # Function that fetches data from each n8n instance and pushes it to the API
 def do_task(type):
