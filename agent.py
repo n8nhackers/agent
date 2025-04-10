@@ -18,27 +18,81 @@ for i in range(1, 11):  # Assuming up to 10 instances
     if instance_name and instance_url and instance_api_key:
         INSTANCES.append((instance_name, instance_url, instance_api_key))
         
-def get_executions_from_n8n(instance_url, api_key):
-    headers = {'Authorization': f'Bearer {api_key}'}
-    try:
-        final_url = f'{instance_url}/api/v1/executions?limit=1000'
-        response = requests.get(final_url, headers=headers)
-        response.raise_for_status()
-        return response.json()
-    except requests.exceptions.RequestException as e:
-        print(f"Error fetching executions from {instance_url}: {e}")
-        return None
+def get_executions_from_n8n(instance_url, api_key, status=None, include_data=False, paginate=False, cursor=None):
+    headers = {
+        'content-type': 'application/json',
+        'X-N8N-API-KEY': api_key
+    }
+    
+    options = {
+        'method': 'GET',
+        'url': f'{instance_url}/api/v1/executions?limit=100',
+        'headers': headers
+    }
+    
+    if status is not None and status != '':
+        options['url'] = f'{options["url"]}&status={status}'
+    
+    if include_data:
+        options['url'] = f'{options["url"]}&includeData=true'
+        
+    if cursor:
+        options['url'] = f'{options["url"]}&cursor={cursor}'
+    
+    print(options['url'])
+    
+    options['agentOptions'] = {
+        'rejectUnauthorized': False
+    }
+    
+    response = requests.get(options['url'], headers=options['headers'])
+    if response.status_code > 400:
+        return []
+    else:
+        try:
+            obj = response.json()
+            
+            final_executions = list(obj['data'])
+            
+            if paginate and 'nextCursor' in obj and obj['nextCursor'] is not None:
+                final_executions += get_executions_from_n8n(instance_url, api_key, status, include_data, paginate, obj['nextCursor'])
+        
+            return final_executions
+        except Exception as e:
+            print(f"Error processing executions from {instance_url}: {e}")
+            return []
 
-def get_workflows_from_n8n(instance_url, api_key):
-    headers = {'Authorization': f'Bearer {api_key}'}
-    try:
-        final_url = f'{instance_url}/api/v1/workflows?limit=1000'
-        response = requests.get(final_url, headers=headers)
-        response.raise_for_status()
-        return response.json()
-    except requests.exceptions.RequestException as e:
-        print(f"Error fetching executions from {instance_url}: {e}")
-        return None
+def get_workflows_from_n8n(instance_url, api_key, cursor=None):
+    headers = {
+        'content-type': 'application/json',
+        'X-N8N-API-KEY': api_key
+    }
+    options = {
+        'method': 'GET',
+        'url': f'{instance_url}/api/v1/workflows?limit=250',
+        'headers': headers
+    }
+    options['agentOptions'] = {
+        'rejectUnauthorized': False
+    }
+    
+    if cursor:
+        options['url'] = f'{options["url"]}&cursor={cursor}'
+    
+    response = requests.get(options['url'], headers=options['headers'])
+    if response.status_code > 400:
+        return []
+    else:
+        try:
+            obj = response.json()
+            final_workflows = obj['data']
+            if 'nextCursor' in obj and obj['nextCursor'] is not None:
+                final_workflows += get_workflows_from_n8n(instance_url, api_key, obj['nextCursor'])
+                
+            return final_workflows
+        except Exception as e:
+            print(f"Error fetching workflows from {instance_url}: {e}")
+            return []
 
 def check_up(instance_url, api_key):
     #check if instance_url is up
@@ -90,7 +144,9 @@ def do_task(type):
     for instance_name, instance_url, instance_api_key in INSTANCES:
         print(f"Fetching data from {instance_name}...")
         if check_up(instance_url, instance_api_key):
+            print (f"{instance_name} is up")
             if check_access(instance_url, instance_api_key):
+                print(f"Access granted for {instance_name}")
                 if type == 'alarms':
                     data = get_executions_from_n8n(instance_url, instance_api_key)
                 elif type == 'backups':
