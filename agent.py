@@ -135,9 +135,11 @@ def push_data_to_n8nhackers(instance_name, type, data):
     try:
         response = requests.post(f'{N8NHACKERS_API_URL}/api/v1/agent/data', json=json, headers=headers)
         response.raise_for_status()
+        print (f"Response: {response.status_code} {response.content}")
         print(f"Data pushed successfully for {instance_name}")
     except requests.exceptions.RequestException as e:
-        print(f"Error pushing data for {instance_name}: {e}")
+        output = e.response.json()
+        print(f"Error pushing data for {instance_name}: {response.status_code} {output}")
     
 # Function that fetches data from each n8n instance and pushes it to the API
 def do_task(type):
@@ -165,10 +167,10 @@ def do_task(type):
 
 # Schedule the task every x minutes (e.g., every 10 minutes)
 print("Scheduling tasks ...")
-schedule.every(5).minutes.do(lambda: do_task('alarms'))
-schedule.every(1).day.at("06:00").do(lambda: do_task('backups'))
+# schedule.every(1).minutes.do(lambda: do_task('alarms'))
+# schedule.every(1).day.at("06:00").do(lambda: do_task('backups'))
 
-# do_task('alarms')  # Run immediately for testing
+do_task('alarms')  # Run immediately for testing
 
 # Run the scheduler
 while True:
