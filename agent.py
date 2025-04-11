@@ -135,7 +135,6 @@ def push_data_to_n8nhackers(instance_name, type, data):
     try:
         response = requests.post(f'{N8NHACKERS_API_URL}/api/v1/agent/data', json=json, headers=headers)
         response.raise_for_status()
-        print (f"Response: {response.status_code} {response.content}")
         print(f"Data pushed successfully for {instance_name}")
     except requests.exceptions.RequestException as e:
         output = e.response.json()
