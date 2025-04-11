@@ -25,6 +25,43 @@ n8nhackers/agent:latest
 
 For detailed installation instructions, visit the [n8nhackers installations panel](https://n8nhackers.com/en/dashboard/resources/installations).
 
+## Features
+
+### Installations
+
+Add as many n8ns you want to monitor. Use our dashboard to control multiple n8ns.
+
+![Installation Steps](images/installations.png)
+
+### Monitoring and Alarms
+The agent provides real-time monitoring and alarm notifications for critical events, ensuring your workflows run smoothly.
+
+![Documentation Reference](images/alarms.png)
+
+### Workflow Backups
+Automate your workflow backups to prevent data loss and maintain operational continuity.
+
+![Documentation Reference](images/backups.png)
+
+
+### Execution Metrics
+Track and analyze execution metrics to optimize workflow performance.
+
+![Execution Metrics](images/executions.png)
+
+### Workflows
+
+Manage and organize your workflows efficiently with the agent's intuitive interface. Easily monitor, edit, and optimize workflows to ensure seamless operations.
+
+![Workflow Overview](images/workflows.png)
+
+
+### Workflows Documentation
+
+Access comprehensive documentation for managing your workflows. The agent allows you to query existing workflow documentation automatically, enabling you to create, edit, and optimize workflows effectively using its advanced features.
+
+![Workflow Documentation](images/documentation.png)
+
 ## Change Log
 
 ### [1.0.0] - Initial Release
