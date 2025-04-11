@@ -3,6 +3,9 @@ import requests
 import schedule
 import time
 from dotenv import load_dotenv
+import gzip
+import json as json_lib
+from io import BytesIO
 
 load_dotenv()
 
@@ -126,19 +129,26 @@ def push_data_to_n8nhackers(instance_name, type, data):
         'type': type,
         'data': data
     }
-    print (f"Pushing data to n8nhackers for {instance_name}...")
-    # print (json)
+    print(f"Pushing data to n8nhackers for {instance_name}...")
+    
+    # Compress data with gzip
+    compressed_data = BytesIO()
+    with gzip.GzipFile(fileobj=compressed_data, mode='wb') as gz_file:
+        gz_file.write(json_lib.dumps(json).encode('utf-8'))
+    compressed_data.seek(0)
+    
     headers = {
         'X-API-KEY': N8NHACKERS_API_KEY,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Content-Encoding': 'gzip'
     }
     try:
-        response = requests.post(f'{N8NHACKERS_API_URL}/api/v1/agent/data', json=json, headers=headers)
+        response = requests.post(f'{N8NHACKERS_API_URL}/api/v1/agent/data', data=compressed_data.read(), headers=headers)
         response.raise_for_status()
         print(f"Data pushed successfully for {instance_name}")
     except requests.exceptions.RequestException as e:
-        output = e.response.json()
-        print(f"Error pushing data for {instance_name}: {response.status_code} {output}")
+        output = e.response.json() if e.response else str(e)
+        print(f"Error pushing data for {instance_name}: {response.status_code if e.response else 'N/A'} {output}")
     
 # Function that fetches data from each n8n instance and pushes it to the API
 def do_task(type):
