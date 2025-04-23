@@ -195,11 +195,11 @@ class TaskManager():
         for instance_name, instance_url, instance_api_key in self.instances:
             print(f"Fetching data from {instance_name}...")
             status = self.check_up(instance_url, instance_api_key)
-            self.push_data_to_n8nhackers(instance_url, instance_name, type, {"status": status})
+            self.push_data_to_n8nhackers(instance_url, instance_name, 'availability', {"status": status})
             if status:
                 print (f"{instance_name} is up")
                 access = self.check_access(instance_url, instance_api_key)
-                self.push_data_to_n8nhackers(instance_url, instance_name, type, {"access": access})
+                self.push_data_to_n8nhackers(instance_url, instance_name, 'access', {"status": access})
                 if access:
                     print(f"Access granted for {instance_name}")
                     if type == 'executions':
