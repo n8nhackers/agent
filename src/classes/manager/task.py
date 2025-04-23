@@ -31,7 +31,7 @@ class TaskManager():
     def get_executions_from_n8n(self, instance_url, api_key, status=None, include_data=False, paginate=False, cursor=None):
         headers = {
             'accept': 'application/json',
-            'X-N8N-API-KEY': api_key
+            'x-n8n-api-key': api_key
         }
         
         options = {
@@ -78,7 +78,7 @@ class TaskManager():
     def get_workflows_from_n8n(self, instance_url, api_key, cursor=None):
         headers = {
             'content-type': 'application/json',
-            'X-N8N-API-KEY': api_key
+            'x-n8n-api-key': api_key
         }
         options = {
             'url': f'{instance_url}/api/v1/workflows?limit=250',
@@ -118,9 +118,8 @@ class TaskManager():
     def check_access(self, instance_url, api_key):
         headers = {
             'accept': 'application/json',
-            'X-N8N-API-KEY': api_key
+            'x-n8n-api-key': api_key
         }
-        print (headers['X-N8N-API-KEY'])
         options = {
             'url': f'{instance_url}/api/v1/workflows?limit=1',
             'headers': headers
@@ -152,12 +151,15 @@ class TaskManager():
             'Content-Type': 'application/json',
             'Content-Encoding': 'gzip'
         }
+        
         try:
             print (f"Sending data to {self.n8n_hackers_api_url}/api/v1/agent/data")
             print (f"Headers: {headers}")
             response = requests.post(f'{self.n8n_hackers_api_url}/api/v1/agent/data', data=compressed_data.read(), headers=headers)
-            response.raise_for_status()
-            print(f"Data pushed successfully for {instance_name}")
+            if response.status_code != 200:
+                print (f"Error pushing data to n8nhackers: {response.status_code} {response.text}")
+            else:
+                print(f"Data pushed successfully for {instance_name}")
         except requests.exceptions.RequestException as e:
             output = e.response.json() if e.response else str(e)
             print(f"Error pushing data for {instance_name}: {response.status_code if e.response else 'N/A'} {output}")
