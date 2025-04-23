@@ -75,6 +75,31 @@ class TaskManager():
                 print(f"Error processing executions from {instance_url}: {e}")
                 return []
 
+    def get_metrics_from_n8n(self, instance_url, api_key):
+        headers = {
+            'accept': 'application/json',
+            'x-n8n-api-key': api_key
+        }
+        options = {
+            'url': f'{instance_url}/metrics',
+            'headers': headers
+        }
+        options['agentOptions'] = {
+            'rejectUnauthorized': False
+        }
+        
+        response = requests.get(options['url'], headers=options['headers'])
+        if response.status_code != 200:
+            print (f"Error fetching metrics from {instance_url}: {response.status_code}")
+            return []
+        else:
+            try:
+                obj = response.json()
+                return obj
+            except Exception as e:
+                print(f"Error fetching metrics from {instance_url}: {e}")
+                return []
+
     def get_workflows_from_n8n(self, instance_url, api_key, cursor=None):
         headers = {
             'content-type': 'application/json',
@@ -132,9 +157,10 @@ class TaskManager():
         print (f"Response: {response.status_code}")
         return response.status_code == 200
 
-    def push_data_to_n8nhackers(self, instance_name, type, data):
+    def push_data_to_n8nhackers(self, url, name, type, data):
         json = {
-            'instance_name': instance_name,
+            'url': url,
+            'name': name,
             'type': type,
             'data': data
         }
@@ -158,19 +184,23 @@ class TaskManager():
             if response.status_code != 200:
                 print (f"Error pushing data to n8nhackers: {response.status_code} {response.text}")
             else:
-                print(f"Data pushed successfully for {instance_name} with next response: {response.status_code} {response.text}")
+                print(f"Data pushed successfully for {name} with next response: {response.status_code} {response.text}")
         except requests.exceptions.RequestException as e:
             output = e.response.json() if e.response else str(e)
-            print(f"Error pushing data for {instance_name}: {response.status_code if e.response else 'N/A'} {output}")
+            print(f"Error pushing data for {url}: {response.status_code if e.response else 'N/A'} {output}")
         
     # Function that fetches data from each n8n instance and pushes it to the API
     def do_task(self, type):
         print (self.instances)
         for instance_name, instance_url, instance_api_key in self.instances:
             print(f"Fetching data from {instance_name}...")
-            if self.check_up(instance_url, instance_api_key):
+            status = self.check_up(instance_url, instance_api_key)
+            self.push_data_to_n8nhackers(instance_url, instance_name, type, {"status": status})
+            if status:
                 print (f"{instance_name} is up")
-                if self.check_access(instance_url, instance_api_key):
+                access = self.check_access(instance_url, instance_api_key)
+                self.push_data_to_n8nhackers(instance_url, instance_name, type, {"access": access})
+                if access:
                     print(f"Access granted for {instance_name}")
                     if type == 'executions':
                         data = self.get_executions_from_n8n(instance_url, instance_api_key)
@@ -183,7 +213,7 @@ class TaskManager():
                         return
                         
                     if data:
-                        self.push_data_to_n8nhackers(instance_name, type, data)
+                        self.push_data_to_n8nhackers(instance_url, instance_name, type, data)
                 else:
                     print(f"Access denied for {instance_name}")
             else:
