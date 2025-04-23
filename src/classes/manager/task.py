@@ -13,8 +13,8 @@ class TaskManager():
         if os.path.exists(dotenv_path):
             load_dotenv(dotenv_path)
 
+        self.n8n_hackers_api_url = os.getenv("N8NHACKERS_API_URL", "https://api.n8nhackers.com")
         self.n8n_hackers_api_key = os.getenv("N8NHACKERS_API_KEY")
-        self.n8n_hackers_api_url = os.getenv("N8NHACKERS_API_URL")
 
         # Dynamically load instances from environment variables
         self.instances = []
