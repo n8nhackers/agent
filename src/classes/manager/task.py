@@ -138,7 +138,6 @@ class TaskManager():
             'type': type,
             'data': data
         }
-        print(f"Pushing data to n8nhackers for {instance_name}...")
         
         # Compress data with gzip
         compressed_data = BytesIO()
@@ -153,13 +152,13 @@ class TaskManager():
         }
         
         try:
-            print (f"Sending data to {self.n8n_hackers_api_url}/api/v1/agent/data")
-            print (f"Headers: {headers}")
+            # print (f"Sending data to {self.n8n_hackers_api_url}/api/v1/agent/data")
+            # print (f"Headers: {headers}")
             response = requests.post(f'{self.n8n_hackers_api_url}/api/v1/agent/data', data=compressed_data.read(), headers=headers)
             if response.status_code != 200:
                 print (f"Error pushing data to n8nhackers: {response.status_code} {response.text}")
             else:
-                print(f"Data pushed successfully for {instance_name}")
+                print(f"Data pushed successfully for {instance_name} with next response: {response.status_code} {response.text}")
         except requests.exceptions.RequestException as e:
             output = e.response.json() if e.response else str(e)
             print(f"Error pushing data for {instance_name}: {response.status_code if e.response else 'N/A'} {output}")
@@ -173,10 +172,12 @@ class TaskManager():
                 print (f"{instance_name} is up")
                 if self.check_access(instance_url, instance_api_key):
                     print(f"Access granted for {instance_name}")
-                    if type == 'alarms':
+                    if type == 'executions':
                         data = self.get_executions_from_n8n(instance_url, instance_api_key)
-                    elif type == 'backups':
+                    elif type == 'workflows':
                         data = self.get_workflows_from_n8n(instance_url, instance_api_key)
+                    elif type == 'metrics':
+                        data = self.get_metrics_from_n8n(instance_url, instance_api_key)
                     else:
                         print(f"Unknown type: {type}")
                         return
@@ -191,10 +192,11 @@ class TaskManager():
     def init_scheduler(self):
         # Schedule the task every x minutes (e.g., every 10 minutes)
         print("Scheduling tasks ...")
-        # schedule.every(1).minutes.do(lambda: do_task('alarms'))
-        # schedule.every(1).day.at("06:00").do(lambda: do_task('backups'))
+        # schedule.every(5).minutes.do(lambda: do_task('executions'))
+        # schedule.every(5).minutes.do(lambda: do_task('metrics'))
+        # schedule.every(1).day.at("06:00").do(lambda: do_task('workflows'))
 
-        self.do_task('alarms')  # Run immediately for testing
+        self.do_task('executions')  # Run immediately for testing
 
         # Run the scheduler
         while True:

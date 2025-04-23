@@ -6,4 +6,4 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from classes.manager.task import TaskManager
 
 tm = TaskManager()
-tm.do_task('alarms')
+tm.do_task('executions')
