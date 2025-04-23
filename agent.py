@@ -23,7 +23,7 @@ for i in range(1, 11):  # Assuming up to 10 instances
         
 def get_executions_from_n8n(instance_url, api_key, status=None, include_data=False, paginate=False, cursor=None):
     headers = {
-        'content-type': 'application/json',
+        'accept': 'application/json',
         'X-N8N-API-KEY': api_key
     }
     
@@ -49,13 +49,17 @@ def get_executions_from_n8n(instance_url, api_key, status=None, include_data=Fal
     }
     
     response = requests.get(options['url'], headers=options['headers'])
-    if response.status_code > 400:
+    print (f"Response: {response.status_code}")
+    if response.status_code != 200:
+        print (f"Error fetching executions from {instance_url}: {response.status_code}")
         return []
     else:
         try:
             obj = response.json()
             
             final_executions = list(obj['data'])
+            
+            print(f"Fetched {len(final_executions)} executions from {instance_url}")
             
             if paginate and 'nextCursor' in obj and obj['nextCursor'] is not None:
                 final_executions += get_executions_from_n8n(instance_url, api_key, status, include_data, paginate, obj['nextCursor'])
@@ -83,7 +87,8 @@ def get_workflows_from_n8n(instance_url, api_key, cursor=None):
         options['url'] = f'{options["url"]}&cursor={cursor}'
     
     response = requests.get(options['url'], headers=options['headers'])
-    if response.status_code > 400:
+    if response.status_code != 200:
+        print (f"Error fetching workflows from {instance_url}: {response.status_code}")
         return []
     else:
         try:
@@ -107,21 +112,22 @@ def check_up(instance_url, api_key):
     
 def check_access(instance_url, api_key):
     headers = {
-        'content-type': 'application/json',
-        'X-N8N-API-KEY': api_key
+        'accept': 'application/json',
+        'x-n8n-api-key': api_key
     }
-    final_url = f'{instance_url}/api/v1/executions?limit=1'
     options = {
         'method': 'GET',
-        'url': final_url,
+        'url': f'{instance_url}/api/v1/workflows?limit=1',
         'headers': headers
     }
     options['agentOptions'] = {
         'rejectUnauthorized': False
     }
+        
+    # print (f"Headers: {options['headers']}")
     response = requests.get(options['url'], headers=options['headers'])
-    return response.status_code < 400
-    
+    print (f"Response: {response.status_code}")
+    return response.status_code == 200
 
 def push_data_to_n8nhackers(instance_name, type, data):
     json = {
