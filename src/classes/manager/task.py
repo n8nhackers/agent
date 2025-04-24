@@ -308,4 +308,3 @@ class TaskManager():
         while True:
             schedule.run_pending()
             time.sleep(1)  # Check every second for any scheduled tasks
-            # schedule.run_all()  # Run all jobs immediately for testing    
