@@ -40,7 +40,7 @@ class TaskManager():
         }
         
         options = {
-            'url': f'{instance_url}/api/v1/executions?limit=100',
+            'url': f'{instance_url}/api/v1/executions?limit=100&includeData=true',
             'headers': headers
         }
         
