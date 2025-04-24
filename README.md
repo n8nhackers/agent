@@ -64,6 +64,12 @@ Access comprehensive documentation for managing your workflows. The agent allows
 
 ## Change Log
 
+### [1.0.1] - New capabilities
+- Organize code
+- Change parsing of instances
+- Recover pending jobs
+- Add metrics
+
 ### [1.0.0] - Initial Release
 - Added monitoring support for up to 10 n8n instances.
 - Introduced alarm notifications for critical events.

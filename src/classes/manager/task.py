@@ -23,7 +23,12 @@ class TaskManager():
             instance_url = os.getenv(f"INSTANCE_URL{i}")
             instance_api_key = os.getenv(f"INSTANCE_API_KEY{i}")
             if instance_name and instance_url and instance_api_key:
-                self.instances.append((instance_name, instance_url, instance_api_key))
+                data = {
+                    'name': instance_name,
+                    'url': instance_url,
+                    'api_key': instance_api_key
+                }
+                self.instances.append(data)
                 
         print (f"Loaded {len(self.instances)} instances from environment variables.")
             
@@ -191,8 +196,11 @@ class TaskManager():
         
     # Function that fetches data from each n8n instance and pushes it to the API
     def do_task(self, type):
-        print (self.instances)
-        for instance_name, instance_url, instance_api_key in self.instances:
+        for instance in self.instances:
+            instance_name = instance['name']
+            instance_url = instance['url']
+            instance_api_key = instance['api_key']
+            
             print(f"Fetching data from {instance_name}...")
             status = self.check_up(instance_url, instance_api_key)
             self.push_data_to_n8nhackers(instance_url, instance_name, 'availability', {"status": status})
@@ -218,15 +226,83 @@ class TaskManager():
                     print(f"Access denied for {instance_name}")
             else:
                 print(f"{instance_name} is down")
-                
+    
+    def get_pending_jobs(self):
+        # Fetch pending jobs from the n8n instance
+        headers = {
+            'accept': 'application/json',
+            'x-n8n-api-key': self.n8n_hackers_api_key
+        }
+        
+        options = {
+            'url': f'{self.n8n_hackers_api_url}/api/v1/agent/jobs/pending',
+            'headers': headers
+        }
+        
+        response = requests.get(options['url'], headers=options['headers'])
+        if response.status_code != 200:
+            print (f"Error fetching pending jobs: {response.status_code}")
+            return []
+        else:
+            try:
+                obj = response.json()
+                return obj['data']
+            except Exception as e:
+                print(f"Error processing pending jobs: {e}")
+                return []
+            
+    def execute_job(self, instance_id, instance_url, parameters):
+        #depending on the job, call the right ep
+        #parameters.action == 'restore', restores a workflow
+        instance = next((x for x in self.instances if x['url'] == instance_url), None)
+        
+        if not instance:
+            print(f"Instance {instance_url} not found in the list of instances.")
+            return
+        
+        print (f"Executing job for instance {instance_id} with parameters: {parameters}")
+        
+        if parameters['action'] == 'restore':
+            #we do workflow restore
+            pass
+    
+    def execute_pending_jobs(self):
+        # Check if the instance is up
+        response = self.get_pending_jobs()
+        jobs = response['data'] if response and 'data' in response else []
+        if not jobs:
+            print("No pending jobs to execute.")
+            return
+        for job in jobs:
+            instance_id = job.get('instance_id')
+            instance_url = job.get('instance_url')
+            parameters = job.get('parameters')
+            
+            if not instance_id or not instance_url or not parameters:
+                print(f"Invalid job data: {job}")
+                continue
+            
+            # Check if the instance is up
+            if not self.check_up(instance_url, self.n8n_hackers_api_key):
+                print(f"Instance {instance_id} is down. Skipping job execution.")
+                continue
+            
+            # Check if the instance is accessible
+            if not self.check_access(instance_url, self.n8n_hackers_api_key):
+                print(f"Instance {instance_id} is not accessible. Skipping job execution.")
+                continue
+            
+            # Execute the job
+            self.execute_job(instance_id, instance_url, parameters)
+              
     def init_scheduler(self):
         # Schedule the task every x minutes (e.g., every 10 minutes)
         print("Scheduling tasks ...")
-        # schedule.every(5).minutes.do(lambda: do_task('executions'))
-        # schedule.every(5).minutes.do(lambda: do_task('metrics'))
-        # schedule.every(1).day.at("06:00").do(lambda: do_task('workflows'))
+        schedule.every(5).minutes.do(lambda: self.do_task('executions'))
+        schedule.every(5).minutes.do(lambda: self.do_task('metrics'))
+        schedule.every(1).day.at("06:00").do(lambda: self.do_task('workflows'))
 
-        self.do_task('executions')  # Run immediately for testing
+        schedule.every(5).minutes.do(self.execute_pending_jobs)
 
         # Run the scheduler
         while True:
