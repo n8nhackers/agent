@@ -1,13 +1,11 @@
-version: '3.8'  # Update to 3.8 to support platforms
 services:
-    agent:
-        container_name: n8nhackers-agent
+    n8nhackers-agent:
         environment:
-            - N8NHACKERS_API_KEY=xxxxx
-            - INSTANCE_NAME1=n8n1
-            - INSTANCE_URL1=https://laURL
-            - INSTANCE_API_KEY1=la API
+            - N8NHACKERS_API_KEY=your_n8nhackers_api_key
+            - INSTANCE_NAME1=n8n-name
+            - INSTANCE_URL1=https://your-n8n.mydomain.com
+            - INSTANCE_API_KEY1=your_n8n_api_key
         image: n8nhackers/agent:latest
-        platform: linux/amd64  # Specify the platform for compatibility with macOS
+        platform: linux/arm64
         networks:
             - default
