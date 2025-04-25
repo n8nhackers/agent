@@ -232,7 +232,7 @@ class TaskManager():
         # Fetch pending jobs from the n8n instance
         headers = {
             'accept': 'application/json',
-            'x-n8n-api-key': self.n8n_hackers_api_key
+            'x-api-key': self.n8n_hackers_api_key
         }
         
         options = {
