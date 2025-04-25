@@ -80,31 +80,28 @@ class TaskManager():
                 print(f"Error processing executions from {instance_url}: {e}")
                 return []
 
-    def get_metrics_from_n8n(self, instance_url, api_key):
+    def get_metrics_from_n8n(self, instance_url):
         headers = {
-            'accept': 'application/json',
-            'x-n8n-api-key': api_key
+            'content-type': 'application/text'
         }
         options = {
+            'method': 'GET',
             'url': f'{instance_url}/metrics',
             'headers': headers
         }
         options['agentOptions'] = {
             'rejectUnauthorized': False
         }
-        
         response = requests.get(options['url'], headers=options['headers'])
-        if response.status_code != 200:
-            print (f"Error fetching metrics from {instance_url}: {response.status_code}")
-            return []
+        if response.status_code > 400:
+            return None
         else:
             try:
-                obj = response.json()
+                obj = response.text
                 return obj
             except Exception as e:
-                print(f"Error fetching metrics from {instance_url}: {e}")
-                return []
-
+                return None
+            
     def get_workflows_from_n8n(self, instance_url, api_key, cursor=None):
         headers = {
             'content-type': 'application/json',
@@ -215,7 +212,7 @@ class TaskManager():
                     elif type == 'workflows':
                         data = self.get_workflows_from_n8n(instance_url, instance_api_key)
                     elif type == 'metrics':
-                        data = self.get_metrics_from_n8n(instance_url, instance_api_key)
+                        data = self.get_metrics_from_n8n(instance_url)
                     else:
                         print(f"Unknown type: {type}")
                         return
