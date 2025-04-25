@@ -23,6 +23,8 @@ docker run -d --name n8nhackers-agent \
 n8nhackers/agent:latest
 ```
 
+Don't add trailing slash in your INSTANCE_URLs.
+
 For detailed installation instructions, visit the [n8nhackers installations panel](https://n8nhackers.com/en/dashboard/resources/installations).
 Check all the DockerHub images [here](https://hub.docker.com/r/n8nhackers/agent).
 
