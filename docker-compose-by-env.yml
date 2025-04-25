@@ -1,0 +1,9 @@
+version: '3'
+
+services:
+  agent:
+    image: n8nhackers/agent:latest
+    env_file:
+      - .env
+    networks:
+      - default
