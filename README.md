@@ -24,7 +24,7 @@ n8nhackers/agent:latest
 ```
 
 For detailed installation instructions, visit the [n8nhackers installations panel](https://n8nhackers.com/en/dashboard/resources/installations).
-Check all the DockerHub images [here](https://hub.docker.com/repository/docker/n8nhackers/agent/general).
+Check all the DockerHub images [here](https://hub.docker.com/r/n8nhackers/agent).
 
 ## Features
 
