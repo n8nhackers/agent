@@ -304,6 +304,12 @@ class TaskManager():
         schedule.every(1).day.at("06:00").do(lambda: self.do_task('workflows'))
 
         schedule.every(5).minutes.do(self.execute_pending_jobs)
+        
+        
+        #First run, to get the data immediately
+        self.do_task('executions')
+        self.do_task('workflows')
+        self.do_task('metrics')
 
         # Run the scheduler
         while True:
