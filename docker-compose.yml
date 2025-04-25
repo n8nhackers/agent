@@ -4,7 +4,7 @@ services:
         container_name: n8nhackers-agent
         environment:
             - N8NHACKERS_API_KEY=xxxxx
-            - INSTANCE_NAME1=n8n-digital
+            - INSTANCE_NAME1=n8n1
             - INSTANCE_URL1=https://laURL
             - INSTANCE_API_KEY1=la API
         image: n8nhackers/agent:latest
